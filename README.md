@@ -46,6 +46,21 @@ con autenticazione JWT e autorizzazione basata su **ruolo** e su **proprietà de
 `MEMBER` (assegnato di default alla registrazione) e `MODERATOR`.
 Il `MODERATOR` è il ruolo con privilegi amministrativi.
 
+### Cosa può fare ogni ruolo
+
+| Azione | MEMBER | MODERATOR |
+| --- | :---: | :---: |
+| Registrazione / login | ✅ (pubblico) | ✅ (pubblico) |
+| Leggere utenti / post | ✅ | ✅ |
+| Creare un post | ✅ | ✅ |
+| Modificare un **proprio** post | ✅ | ✅ |
+| Modificare un post **di altri** | ❌ | ✅ |
+| Like / unlike | ✅ | ✅ |
+| Cambiare il ruolo di un utente | ❌ | ✅ |
+
+Il MODERATOR può fare tutto ciò che fa il MEMBER, più: modificare qualsiasi post
+(non solo i propri) e cambiare il ruolo di qualsiasi utente.
+
 ## Endpoint
 
 | Metodo | Path | Auth | Ruolo | Body | Descrizione |
