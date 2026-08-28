@@ -1,4 +1,9 @@
 package valentinaferro.progettosettimanau4w3d5socialnetwork.payloads;
 
-public record ChangeRoleDTO(String role) {
+import jakarta.validation.constraints.NotBlank;
+
+public record ChangeRoleDTO(
+        @NotBlank(message = "Il ruolo e' obbligatorio")
+        String role
+) {
 }
