@@ -1,6 +1,5 @@
 package valentinaferro.progettosettimanau4w3d5socialnetwork.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -23,11 +22,10 @@ import java.util.List;
 @EnableMethodSecurity // senza questa i @PreAuthorize sugli endpoint non funzionano
 public class SecurityConfig {
 
-    @Autowired
-    private JWTAuthFilter jwtAuthFilter;
-
+    // il filtro arriva come parametro del metodo (non come campo) per evitare
+    // la dipendenza circolare SecurityConfig -> JWTAuthFilter -> UserService -> PasswordEncoder -> SecurityConfig
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JWTAuthFilter jwtAuthFilter) throws Exception {
         // niente form di login HTML di default
         httpSecurity.formLogin(formLogin -> formLogin.disable());
         // CSRF inutile con autenticazione a token JWT
