@@ -28,4 +28,9 @@ public class UserService {
         newUser.setRole(Role.MEMBER);
         return this.userRepository.save(newUser);
     }
+
+    // metodo per cercare l'utente per email
+    public User findByEmail(String email) {
+        return this.userRepository.findByEmail(email).orElseThrow(() -> new ValidationException("Utente con email " + email + " non trovato."));
+    }
 }
