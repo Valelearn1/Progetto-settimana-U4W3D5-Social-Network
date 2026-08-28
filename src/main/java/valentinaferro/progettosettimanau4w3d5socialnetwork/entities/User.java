@@ -1,5 +1,6 @@
 package valentinaferro.progettosettimanau4w3d5socialnetwork.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,7 @@ public class User {
         this.email = email;
     }
 
+    @JsonIgnore // la password non compare mai nel JSON di risposta
     private String password;
 
     @Enumerated(EnumType.STRING)
