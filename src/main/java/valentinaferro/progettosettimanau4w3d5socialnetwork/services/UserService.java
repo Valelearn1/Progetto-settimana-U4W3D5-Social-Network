@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import valentinaferro.progettosettimanau4w3d5socialnetwork.entities.User;
 import valentinaferro.progettosettimanau4w3d5socialnetwork.enums.Role;
+import valentinaferro.progettosettimanau4w3d5socialnetwork.exceptions.NotFoundException;
 import valentinaferro.progettosettimanau4w3d5socialnetwork.exceptions.ValidationException;
 import valentinaferro.progettosettimanau4w3d5socialnetwork.payloads.NewUserDTO;
 import valentinaferro.progettosettimanau4w3d5socialnetwork.repositories.UserRepository;
@@ -32,5 +33,11 @@ public class UserService {
     // metodo per cercare l'utente per email
     public User findByEmail(String email) {
         return this.userRepository.findByEmail(email).orElseThrow(() -> new ValidationException("Utente con email " + email + " non trovato."));
+    }
+
+    // metodo per cercare l'utente per id
+    public User findById(long id) {
+        return this.userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Utente con id " + id + " non trovato."));
     }
 }
