@@ -1,0 +1,181 @@
+{
+  "info": {
+    "name": "Social Network U4W3D5",
+    "description": "API REST User/Post/Like con autenticazione JWT.\n\nUso:\n1. Esegui 'Auth / Register' per creare un utente.\n2. Esegui 'Auth / Login': il token viene salvato in automatico nella variabile di collezione {{token}}.\n3. Tutte le altre richieste usano {{token}} come Bearer.\n\nPer provare gli endpoint da MODERATOR, promuovi l'utente dal DB (UPDATE users SET role='MODERATOR' WHERE ...) e ri-esegui il Login.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "userId", "value": "1", "type": "string" },
+    { "key": "postId", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"vale\",\n  \"fullName\": \"Valentina Ferro\",\n  \"email\": \"vale@test.it\",\n  \"password\": \"Password1!\"\n}"
+            },
+            "description": "Crea un nuovo utente (ruolo MEMBER, password hashata BCrypt). Pubblico."
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.accessToken) {",
+                  "    pm.collectionVariables.set(\"token\", json.accessToken);",
+                  "    console.log(\"token salvato in {{token}}\");",
+                  "}",
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"vale@test.it\",\n  \"password\": \"Password1!\"\n}"
+            },
+            "description": "Verifica le credenziali e restituisce { accessToken }. Il test script salva il token in {{token}}."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/users/me", "host": ["{{baseUrl}}"], "path": ["users", "me"] },
+            "description": "Profilo dell'utente loggato (ricavato dal token)."
+          }
+        },
+        {
+          "name": "Get all users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Get user by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["users", "{{userId}}"] }
+          }
+        },
+        {
+          "name": "Change role (solo MODERATOR)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/users/{{userId}}/role", "host": ["{{baseUrl}}"], "path": ["users", "{{userId}}", "role"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"MODERATOR\"\n}"
+            },
+            "description": "Cambia il ruolo di un utente. Richiede che il chiamante sia MODERATOR, altrimenti 403."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "Create post",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/posts", "host": ["{{baseUrl}}"], "path": ["posts"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Il mio primo post\"\n}"
+            },
+            "description": "Crea un post. L'autore e' sempre l'utente loggato."
+          }
+        },
+        {
+          "name": "Get all posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/posts", "host": ["{{baseUrl}}"], "path": ["posts"] }
+          }
+        },
+        {
+          "name": "Get post by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/posts/{{postId}}", "host": ["{{baseUrl}}"], "path": ["posts", "{{postId}}"] }
+          }
+        },
+        {
+          "name": "Update post (autore o MODERATOR)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/posts/{{postId}}", "host": ["{{baseUrl}}"], "path": ["posts", "{{postId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Post modificato\"\n}"
+            },
+            "description": "Modifica consentita solo all'autore del post o a un MODERATOR."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Likes",
+      "item": [
+        {
+          "name": "Add like",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/posts/{{postId}}/like", "host": ["{{baseUrl}}"], "path": ["posts", "{{postId}}", "like"] },
+            "description": "Aggiunge un like al post. Un utente non puo' mettere piu' di un like allo stesso post (400 se duplicato)."
+          }
+        },
+        {
+          "name": "Remove like",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/posts/{{postId}}/like", "host": ["{{baseUrl}}"], "path": ["posts", "{{postId}}", "like"] },
+            "description": "Rimuove il proprio like dal post (404 se non era stato messo)."
+          }
+        }
+      ]
+    }
+  ]
+}
