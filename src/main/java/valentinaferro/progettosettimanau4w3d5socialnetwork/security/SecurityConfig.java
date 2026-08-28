@@ -1,5 +1,6 @@
 package valentinaferro.progettosettimanau4w3d5socialnetwork.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -10,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -21,6 +23,9 @@ import java.util.List;
 @EnableMethodSecurity // senza questa i @PreAuthorize sugli endpoint non funzionano
 public class SecurityConfig {
 
+    @Autowired
+    private JWTAuthFilter jwtAuthFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         // niente form di login HTML di default
@@ -29,8 +34,12 @@ public class SecurityConfig {
         httpSecurity.csrf(csrf -> csrf.disable());
         // JWT e' stateless: nessuna sessione lato server
         httpSecurity.sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        // per ora tutti gli endpoint sono aperti; la protezione arrivera' dal filtro JWT
-        httpSecurity.authorizeHttpRequests(req -> req.requestMatchers("/**").permitAll());
+        // /auth/** pubblici (register, login); tutto il resto richiede autenticazione
+        httpSecurity.authorizeHttpRequests(req -> req
+                .requestMatchers("/auth/**").permitAll()
+                .anyRequest().authenticated());
+        // il nostro filtro JWT gira prima del filtro standard di Spring Security
+        httpSecurity.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         // abilita la configurazione CORS definita sotto
         httpSecurity.cors(Customizer.withDefaults());
 

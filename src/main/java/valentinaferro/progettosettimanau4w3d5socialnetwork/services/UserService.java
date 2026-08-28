@@ -10,6 +10,8 @@ import valentinaferro.progettosettimanau4w3d5socialnetwork.exceptions.Validation
 import valentinaferro.progettosettimanau4w3d5socialnetwork.payloads.NewUserDTO;
 import valentinaferro.progettosettimanau4w3d5socialnetwork.repositories.UserRepository;
 
+import java.util.List;
+
 @Service
 public class UserService {
     @Autowired
@@ -39,5 +41,21 @@ public class UserService {
     public User findById(long id) {
         return this.userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Utente con id " + id + " non trovato."));
+    }
+
+    // lista di tutti gli utenti
+    public List<User> findAll() {
+        return this.userRepository.findAll();
+    }
+
+    // cambio ruolo di un utente esistente
+    public User changeRole(long id, String newRole) {
+        User user = this.findById(id);
+        try {
+            user.setRole(Role.valueOf(newRole.toUpperCase()));
+        } catch (IllegalArgumentException ex) {
+            throw new ValidationException("Ruolo '" + newRole + "' non valido. Valori ammessi: MEMBER, MODERATOR");
+        }
+        return this.userRepository.save(user);
     }
 }
